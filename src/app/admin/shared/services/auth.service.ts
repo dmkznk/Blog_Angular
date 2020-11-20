@@ -4,16 +4,15 @@ import {FbAuthResponse, User} from '../../../shared/interfaces';
 import {Observable, Subject, throwError} from 'rxjs';
 import {environment} from '../../../../environments/environment';
 import {catchError, tap} from 'rxjs/operators';
-import {AuthEnum} from '../../../shared/enums/auth.enum';
+import {AuthEnum} from '../enums/auth.enum';
 
 @Injectable()
 export class AuthService {
 
-  public error$: Subject<string> = new Subject<string>(); // why not just 'string' ?
+  public error$: Subject<string> = new Subject<string>();
 
   constructor(private http: HttpClient) {}
 
-  // get ?
   public get token(): string {
     const expDate = new Date(localStorage.getItem('fb-token-exp'));
 
@@ -30,7 +29,7 @@ export class AuthService {
     return this.http.post(`https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key=${environment.apiKey}`, user)
       .pipe(
         tap<FbAuthResponse>(this.setToken),
-        catchError(this.handleError.bind(this)) // why to bind ?
+        catchError(this.handleError.bind(this))
       );
   }
 
@@ -42,9 +41,8 @@ export class AuthService {
     return Boolean(this.token);
   }
 
-  // why do we need to return Observable ?
   private handleError(error: HttpErrorResponse): Observable<any>{
-    const {message} = error.error.error; // what ?
+    const {message} = error.error.error;
 
     this.error$.next(AuthEnum[message]);
 
@@ -62,8 +60,3 @@ export class AuthService {
   }
 }
 
-// [1,2,3,4].forEach(f);
-//
-// function f(i) {
-//   console.log(i);
-// }

@@ -4,6 +4,9 @@
   <div class="alert alert-danger" *ngIf="authService.error$ | async as errorMessage">
     {{errorMessage}}
   </div>
+  <div class="alert alert-info" *ngIf="loginMessage">
+    {{loginMessage}}
+  </div>
 
   <div class="form-control"
        [ngClass]="{invalid: form.get('email').touched && form.get('email').invalid}">
@@ -23,7 +26,7 @@
 
   <div class="form-control"
        [ngClass]="{invalid: form.get('password').touched && form.get('password').invalid}">
-    <label for="password">Password</label>
+    <label for="password">Password:</label>
     <input id="password" type="password" formControlName="password">
 
     <div *ngIf="form.get('password').touched && form.get('password').invalid"

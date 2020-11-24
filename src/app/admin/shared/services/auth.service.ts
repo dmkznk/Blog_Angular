@@ -6,7 +6,7 @@ import {environment} from '../../../../environments/environment';
 import {catchError, tap} from 'rxjs/operators';
 import {AuthEnum} from '../enums/auth.enum';
 
-@Injectable()
+@Injectable({providedIn: 'root'})
 export class AuthService {
 
   public error$: Subject<string> = new Subject<string>();

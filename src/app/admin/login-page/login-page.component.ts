@@ -28,8 +28,11 @@ export class LoginPageComponent implements OnInit {
 
   private createLoginMessage(): void {
     this.route.queryParams.subscribe((params: Params) => {
+
       if (params.pleaseLogin) {
         this.loginMessage = 'Please login';
+      } else if (params.authFailed) {
+        this.loginMessage = 'The session is over, please login again';
       }
     });
   }

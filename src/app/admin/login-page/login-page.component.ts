@@ -1,40 +1,32 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {FormControl, FormGroup, Validators} from '@angular/forms';
-import {User} from '../../shared/interfaces';
 import {AuthService} from '../shared/services/auth.service';
 import {ActivatedRoute, Params, Router} from '@angular/router';
+import {Subject} from 'rxjs';
+import {takeUntil} from 'rxjs/operators';
 
 @Component({
   selector: 'app-login-page',
   templateUrl: './login-page.component.html',
   styleUrls: ['./login-page.component.scss']
 })
-export class LoginPageComponent implements OnInit {
+export class LoginPageComponent implements OnInit, OnDestroy {
 
+  private returnUrl: string;
+  private unSubscribeAll = new Subject();
   public form: FormGroup;
   public submitted = false;
   public loginMessage: string;
 
   constructor(
-    public authService: AuthService,
     private router: Router,
-    private route: ActivatedRoute
+    private route: ActivatedRoute,
+    public authService: AuthService
     ) { }
 
   ngOnInit(): void {
     this.setForm();
     this.createLoginMessage();
-  }
-
-  private createLoginMessage(): void {
-    this.route.queryParams.subscribe((params: Params) => {
-
-      if (params.pleaseLogin) {
-        this.loginMessage = 'Please login';
-      } else if (params.authFailed) {
-        this.loginMessage = 'The session is over, please login again';
-      }
-    });
   }
 
   private setForm(): void {
@@ -51,23 +43,44 @@ export class LoginPageComponent implements OnInit {
   }
 
   public submit(): void {
-   if (this.form.invalid) {
-     return;
+   if (this.form.valid) {
+     this.submitted = true;
+     this.login();
    }
+  }
 
-   this.submitted = true;
+  private login(): void {
+    const {email, password} = this.form.value;
 
-   const user: User = {
-      email: this.form.value.email,
-      password: this.form.value.password,
-    };
+    this.authService.login({email, password}).subscribe(() => {
+      this.redirectAfterLogin();
+      this.form.reset();
+    }).add(() => this.submitted = false);
+  }
 
-   this.authService.login(user).subscribe(() => {
-     this.form.reset();
-     this.router.navigate(['/admin', 'dashboard']).then();
-     this.submitted = false;
-   }, () => {
-     this.submitted = false;
-   });
+  private createLoginMessage(): void {
+    this.route.queryParams
+      .pipe(takeUntil(this.unSubscribeAll))
+      .subscribe((params: Params) => {
+
+        if (params.pleaseLogin) {
+          this.loginMessage = 'Please login';
+        } else if (params.authFailed) {
+          this.loginMessage = 'The session is over, please login again';
+        }
+
+        this.returnUrl = params?.returnUrl;
+      });
+  }
+
+  private redirectAfterLogin(): void {
+    this.returnUrl
+      ? this.router.navigate([this.returnUrl])
+      : this.router.navigate(['/admin', 'dashboard']);
+  }
+
+  ngOnDestroy(): void {
+    this.unSubscribeAll.next();
+    this.unSubscribeAll.complete();
   }
 }

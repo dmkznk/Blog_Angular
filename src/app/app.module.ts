@@ -24,13 +24,17 @@ const INTERCEPTOR_PROVIDER: Provider = {
     HomePageComponent,
     PostPageComponent,
     PostComponent,
+
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
-    SharedModule
+    SharedModule,
   ],
   providers: [INTERCEPTOR_PROVIDER],
-  bootstrap: [AppComponent]
+  exports: [
+
+  ],
+  bootstrap: [AppComponent],
 })
 export class AppModule { }

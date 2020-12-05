@@ -1,7 +1,9 @@
 import {Component, OnDestroy, OnInit} from '@angular/core';
 import {PostsService} from '../../shared/posts.service';
 import {Post} from '../../shared/interfaces';
-import {Subscription} from 'rxjs';
+import {Subject} from 'rxjs';
+import {takeUntil} from 'rxjs/operators';
+import {AlertService} from '../shared/services/alert.service';
 
 @Component({
   selector: 'app-dashboard-page',
@@ -10,35 +12,38 @@ import {Subscription} from 'rxjs';
 })
 export class DashboardPageComponent implements OnInit, OnDestroy {
 
+  private unSubscribeAll = new Subject();
   public posts: Array<Post>;
   public searchValue: string;
-  private getPostsSubscription: Subscription;
-  private deletePostSubscription: Subscription;
 
-  constructor(private postsService: PostsService) { }
+  constructor(
+    private postsService: PostsService,
+    private alertService: AlertService
+  ) {}
 
   ngOnInit(): void {
     this.getPosts();
   }
 
-  ngOnDestroy(): void {
-    if (this.getPostsSubscription) {
-      this.getPostsSubscription.unsubscribe();
-    }
-    if (this.deletePostSubscription) {
-      this.deletePostSubscription.unsubscribe();
-    }
-  }
-
   private getPosts(): void {
-    this.getPostsSubscription = this.postsService.getAllPosts().subscribe(posts => {
+    this.postsService.getAllPosts()
+      .pipe(takeUntil(this.unSubscribeAll))
+      .subscribe(posts => {
       this.posts = posts;
     });
   }
 
   public deletePost(id: string): void {
-    this.deletePostSubscription = this.postsService.deletePost(id).subscribe(() => {
+    this.postsService.deletePost(id)
+      .pipe(takeUntil(this.unSubscribeAll))
+      .subscribe(() => {
       this.posts = this.posts.filter(post => post.id !== id);
+      this.alertService.danger('Post was deleted');
     });
+  }
+
+  ngOnDestroy(): void {
+    this.unSubscribeAll.next();
+    this.unSubscribeAll.complete();
   }
 }

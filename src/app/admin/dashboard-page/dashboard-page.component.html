@@ -26,7 +26,11 @@
           [routerLink]="['/admin', 'post', post.id, 'edit']">
           Open
         </button>
-        <a (click)="deletePost(post.id)">Delete</a>
+        <button
+          class="btn btn-link"
+          (click)="deletePost(post.id)">
+          Delete
+        </button>
       </td>
     </tr>
     </tbody>

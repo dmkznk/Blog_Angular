@@ -1,5 +1,7 @@
-To see admin panel click the following link: https://blog-angular-9928a.web.app/admin/login
-then login with:
+To see admin panel click the following link:
+https://blog-angular-9928a.web.app/admin/login
+
+Then login with:
 E-mail: dm@gmail.com 
 Password: 111111
 

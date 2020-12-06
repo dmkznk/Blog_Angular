@@ -1,4 +1,4 @@
-import {Component, Input, OnDestroy, OnInit} from '@angular/core';
+import {Component, OnDestroy, OnInit} from '@angular/core';
 import {AlertService} from '../../services/alert.service';
 import {takeUntil} from 'rxjs/operators';
 import {AlertType} from '../../../../shared/interfaces';
@@ -13,7 +13,7 @@ export class AlertComponent implements OnInit, OnDestroy {
 
   public text: string;
   public type: AlertType;
-  private unsubscribeAll = new Subject();
+  private unsubscribeAll$ = new Subject();
 
   constructor(private alertService: AlertService) { }
 
@@ -23,7 +23,7 @@ export class AlertComponent implements OnInit, OnDestroy {
 
   private setAlert(): void {
     this.alertService.alert$
-      .pipe(takeUntil(this.unsubscribeAll))
+      .pipe(takeUntil(this.unsubscribeAll$))
       .subscribe(alert => {
       this.type = alert.type;
       this.text = alert.text;
@@ -39,7 +39,7 @@ export class AlertComponent implements OnInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
-    this.unsubscribeAll.next();
-    this.unsubscribeAll.complete();
+    this.unsubscribeAll$.next();
+    this.unsubscribeAll$.complete();
   }
 }
